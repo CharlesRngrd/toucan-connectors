@@ -192,10 +192,15 @@ class SnowflakeConnector(ToucanConnector):
         # `fetch_pandas_all` will only work with `SELECT` queries, if the
         # query does not contains 'SELECT' then we're defaulting to the usual
         # `fetchall`.
-        if 'SELECT' in query.upper():
-            return query_res.fetch_pandas_all()
-        else:
-            return pd.DataFrame.from_dict(query_res.fetchall())
+        try:
+            if 'SELECT' in query.upper():
+                return query_res.fetch_pandas_all()
+            else:
+                return pd.DataFrame.from_dict(query_res.fetchall())
+        except Exception:
+            import traceback
+
+            traceback.print_exc()
 
     def _retrieve_data(self, data_source: SnowflakeDataSource) -> pd.DataFrame:
         warehouse = data_source.warehouse
