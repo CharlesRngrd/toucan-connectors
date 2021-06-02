@@ -51,6 +51,49 @@ class SnowflakeoAuth2Connector(ToucanConnector):
     redirect_uri: str = Field(None, **{'hidden': True})
     category: Category = Field(Category.SNOWFLAKE, **{'hidden': True})
 
+    info_step1: str = Field(
+        '<div style="width: 100%; padding: 10px; background-color: #2a66a1;">Step 1<br />Please fill connector name</div>',
+        title='step_1',
+        widget='info',
+    )
+
+    info_step2: str = Field(
+        '<div style="width: 100%; padding: 10px; background-color: #2a66a1;">Step 2<br />Play this request in Snowflake<br />'
+        'create security integration toucan_oauth2_{{name}}<br />'
+        '<span style="color: red;">'
+        'type = oauth<br />'
+        'enabled = true<br />'
+        'oauth_client = custom<br />'
+        'oauth_client_type = "CONFIDENTIAL"<br />'
+        'oauth_redirect_uri = "https://localhost:5000/{{small_app_name}}/oauth/redirect?connector_name={{name}}"<br />'
+        'oauth_issue_refresh_tokens = true<br />'
+        'oauth_allow_non_tls_redirect_uri = true<br />'
+        'oauth_refresh_token_validity = 86400<br />'
+        'pre_authorized_roles_list = ("PUBLIC");<br />'
+        '</span>'
+        '<br />'
+        'If you update your connector name, play this request<br />'
+        '<span style="color: red;">'
+        'alter security integration toucan_oauth2_{{name}} set oauth_redirect_uri = "http://localhost:5000/{{small_app_name}}/oauth/redirect?connector_name={{name}}";'
+        '</span>'
+        '</div>',
+        title='step_2',
+        widget='info',
+        **{'watch_field': ['name', 'small_app_name']},
+    )
+
+    info_step3: str = Field(
+        '<div style="width: 100%; padding: 10px; background-color: #2a66a1;">Step 2<br />'
+        'Get your client_id and client_secret with request<br />'
+        '<span style="color: red;">'
+        'select system$show_oauth_client_secrets("toucan_oauth2_{{name}}");'
+        '</span>'
+        '</div>',
+        title='step_3',
+        widget='info',
+        **{'watch_field': ['name']},
+    )
+
     client_id: str = Field(
         ...,
         title='Client ID',
@@ -90,8 +133,8 @@ class SnowflakeoAuth2Connector(ToucanConnector):
         required_label=True,
     )
     default_warehouse: str = Field(
-        None,
-        title='Default warehouse',
+        ...,
+        title="Default warehouse",
         description='The default warehouse that shall be used for any data source',
         **{'ui.required': True},
         required_label=True,
@@ -101,8 +144,11 @@ class SnowflakeoAuth2Connector(ToucanConnector):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type['SnowflakeoAuth2Connector']) -> None:
             ordered_keys = [
+                'info_step1',
                 'name',
+                'info_step2',
                 'account',
+                'info_step3',
                 'client_id',
                 'client_secret',
                 'role',
