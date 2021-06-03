@@ -144,6 +144,7 @@ class SnowflakeoAuth2Connector(ToucanConnector):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type['SnowflakeoAuth2Connector']) -> None:
             ordered_keys = [
+                'type',
                 'info_step1',
                 'name',
                 'info_step2',
